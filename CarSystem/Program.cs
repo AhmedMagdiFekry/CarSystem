@@ -1,5 +1,6 @@
 using CarSystem.Data;
 using CarSystem.Models;
+using CarSystem.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,8 +18,10 @@ namespace CarSystem
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("Cs"));
             });
             builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
-            var app = builder.Build();
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddControllersWithViews();
+            var app = builder.Build();
+           
           
            
 

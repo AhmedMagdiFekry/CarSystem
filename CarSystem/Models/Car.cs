@@ -10,6 +10,7 @@ namespace CarSystem.Models
         public string Discription { get; set; }
         public bool IsReserved { get; set; }
         public string Color { get; set; }
+        public string CarImage {  get; set; }
 
         [ForeignKey("AppUser")]
         public string UserId { get; set; }
