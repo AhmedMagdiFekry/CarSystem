@@ -12,7 +12,7 @@ namespace CarSystem.Models
         public string Address { get; set; }
 
         [ForeignKey("UserType")]
-        public int UserTypeId  { get; set; }
+        public int? UserTypeId  { get; set; }
         public UserType UserType { get; set; }
 
 

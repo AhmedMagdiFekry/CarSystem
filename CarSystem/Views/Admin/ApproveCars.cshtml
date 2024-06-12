@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Order>
+<h2>Pending Car Requests</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Color</th>
+            <th>Category</th>
+            <th>User</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>@order.Car.Discription</td>
+                <td>@order.Car.Color</td>
+                <td>@order.Car.Category?.CategoryName </td>
+                <td>@order.AppUser?.FullName </td>
+                <td>
+                    <img src="~/uploads/@order.Car.CarImage" alt="@order.Car.Discription" style="max-height: 100px; max-width: 100px;" />
+                </td>
+                <td>
+                    <form method="post" asp-action="Approve" asp-route-id="@order.Id" style="display:inline;">
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                    <form method="post" asp-action="Reject" asp-route-id="@order.Id" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Reject</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

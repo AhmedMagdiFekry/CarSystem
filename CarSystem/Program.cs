@@ -3,6 +3,7 @@ using CarSystem.Models;
 using CarSystem.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CarSystem
 {
@@ -13,17 +14,45 @@ namespace CarSystem
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+
             builder.Services.AddDbContext<ApplicationDbContext>(opt =>
             {
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("Cs"));
             });
-            builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentity<AppUser, IdentityRole>(opt=>opt.SignIn.RequireConfirmedAccount=true).AddEntityFrameworkStores<ApplicationDbContext>();
+            
+           
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<IUserTypeRepository,UserTypeRepository>();
+            builder.Services.AddScoped<ICarRepository,CarRepository>();
+            builder.Services.AddScoped<IOrderRepository,OrderRepository>();
+
+
+
+           
             builder.Services.AddControllersWithViews();
             var app = builder.Build();
-           
-          
-           
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
+
+                    // Seed roles
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                    SeedRoles(roleManager).Wait();
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while seeding the database.");
+                }
+            }
+
+
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -37,7 +66,7 @@ namespace CarSystem
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
@@ -46,5 +75,20 @@ namespace CarSystem
 
             app.Run();
         }
+       private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)
+        {
+            string[] roleNames = { "Admin", "Owner", "Customer" };
+
+            foreach (var roleName in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(roleName);
+                if (!roleExist)
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+        }
+
     }
+
 }

@@ -1,0 +1,48 @@
+﻿@model IEnumerable<Car>
+
+@{
+    ViewData["Title"] = "My Cars";
+}
+
+<h2>My Cars</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Color</th>
+            <th>Category</th>
+            <th>Is Reserved</th>
+            <th>Price Per Day</th>
+            <th>Image</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var car in Model)
+        {
+            <tr>
+                <td>@car.Discription</td>
+                <td>@car.Color</td>
+                <td>@car.Category?.CategoryName</td>
+                <td>@car.IsReserved</td>
+                <td>@car.PricePerDay</td>
+
+                <td>
+                    @if (!string.IsNullOrEmpty(car.CarImage))
+                    {
+                        <img src="~/uploads/@car.CarImage" alt="@car.Discription" style="max-height: 100px; max-width: 100px;" />
+                    }
+                </td>
+              
+                <td>
+                    <form method="post" action="/Car/Delete?id=@car.Id" onsubmit="return confirm('Are You Sure You Want To Delete This Car?');">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-success">Add New Car</a>

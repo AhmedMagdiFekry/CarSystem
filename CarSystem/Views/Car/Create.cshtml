@@ -1,0 +1,46 @@
+﻿@model CreateCarViewModel
+@{
+    ViewData["Title"] = "Add New Car";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" class="form form-control" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div>
+        <div>
+            <label asp-for="Description" class="control-label"></label>
+            <input asp-for="Description" class="form-control" />
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="Color" class="control-label"></label>
+            <input asp-for="Color" class="form-control" />
+            <span asp-validation-for="Color" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="PricePerDay" class="control-label"></label>
+            <input asp-for="PricePerDay" class="form-control" />
+            <span asp-validation-for="PricePerDay" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="CarImage" class="control-label"></label>
+            <input asp-for="CarImage" class="form-control" />
+            <span asp-validation-for="CarImage" class="text-danger"></span>
+        </div>
+        <div>
+            <label asp-for="CategoryId" class="control-label"></label>
+            <select asp-for="CategoryId" class="form-control" asp-items="@(ViewBag.Categories)">
+                <option value="">Select Category</option> <!-- Default option -->
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+        <div>
+            <input type="submit" value="Add Car" class="btn btn-primary" />
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

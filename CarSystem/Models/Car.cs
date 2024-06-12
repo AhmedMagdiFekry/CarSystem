@@ -11,6 +11,7 @@ namespace CarSystem.Models
         public bool IsReserved { get; set; }
         public string Color { get; set; }
         public string CarImage {  get; set; }
+        public decimal PricePerDay {  get; set; }
 
         [ForeignKey("AppUser")]
         public string UserId { get; set; }
@@ -19,5 +20,7 @@ namespace CarSystem.Models
         public int CategoryId { get; set; }
        
         public Category Category { get; set; }
+
+        public ICollection<Order> Orders { get; set; }
     }
 }

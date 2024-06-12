@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Car>
+@{
+    var pendingOrders = ViewBag.PendingOrders as List<Order>;
+}
+
+<h2>Available Cars</h2>
+
+<div class="row">
+    @foreach (var car in Model)
+    {
+        var pendingOrder = pendingOrders?.FirstOrDefault(o => o.CarId == car.Id);
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm">
+                <img class="card-img-top" src="~/uploads/@car.CarImage" alt="Car image">
+                <div class="card-body">
+                    <h5 class="card-title">@car.Discription</h5>
+                    <p class="card-text">
+                        <strong>Color:</strong> @car.Color<br />
+                        <strong>Category:</strong> @car.Category?.CategoryName<br />
+                        <strong>Created At:</strong> @car.CreatedAt.ToString("dd/MM/yyyy")<br />
+                        <strong>Owner:</strong> @car.AppUser.FullName
+                    </p>
+                    @if (pendingOrder != null)
+                    {
+                        <p class="text-warning">Reservation Pending</p>
+                    }
+                    else
+                    {
+                        <form method="post" action="@Url.Action("Reserve", "Customer", new { carId = car.Id })">
+                            <button type="submit" class="btn btn-primary">Reserve</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

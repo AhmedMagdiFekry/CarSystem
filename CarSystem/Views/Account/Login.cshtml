@@ -1,0 +1,33 @@
+﻿@model LoginUserViewModel
+<h1 class="text-info">Login Here </h1>
+<form asp-action="Login" class="form-control">
+    <div asp-validation-summary="All">
+    </div>
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <div>
+        <label asp-for="RememberMe"></label>
+        <input asp-for="RememberMe" type="checkbox" />
+        <span asp-validation-for="RememberMe"></span>
+    </div>
+    <div>
+        <input type="submit" value="Login" class="btn btn-primary">
+    </div>
+    <div>
+        <a asp-action="Register" asp-controller="Account">
+            Register
+        </a>
+    </div>
+
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+}
