@@ -31,18 +31,50 @@ namespace CarSystem.Repositories
                 .ToList();
         }
 
-        List<Order> IOrderRepository.GetOrdersByUserId(string userId)
-        {
-           return _context.Orders.Where(p=>p.UserId==userId).ToList();
-        }
-
-        IEnumerable<Order> IOrderRepository.GetPendingOrders()
+        IEnumerable<Order> IOrderRepository.GetOrdersByCarId(int carId)
         {
             return _context.Orders
-            .Where(order => order.OrderStatusId == 1) // Pending status
-            .Include(order => order.Car)
-            .Include(order => order.AppUser)
-            .ToList();
+           .Where(o => o.CarId == carId)
+           .ToList();
+        }
+
+        List<Order> IOrderRepository.GetOrdersByUserId(string userId)
+        {
+            return _context.Orders
+              .Include(o => o.Car)
+              .Include(o => o.AppUser)
+              .Where(o => o.UserId == userId)
+              .ToList();
+        }
+
+        Order IOrderRepository.GetOrderWithDetails(int orderId)
+        {
+            return _context.Orders
+                   .Include(o => o.Car)
+                   .Include(o => o.AppUser)
+                   .FirstOrDefault(o => o.Id == orderId);
+        }
+
+        IEnumerable<Order> IOrderRepository.GetPendingOrdersForAdmin()
+        {
+
+
+            return _context.Orders
+                .Include(order => order.Car)
+                .Include(order => order.AppUser)
+                .Where(order => order.OrderStatusId == 1) // Orders created for admin approval (UserId == null for admin orders)
+                .ToList();
+
+
+        }
+
+        public IEnumerable<Order> GetPendingOrdersForOwner(string ownerId)
+        {
+            return _context.Orders
+         .Include(order => order.Car)
+         .Include(order => order.AppUser)
+         .Where(order => order.OrderStatusId == 1 && order.Car.UserId == ownerId) // Orders created by customers for owner review
+         .ToList();
         }
 
         void IOrderRepository.RejectOrder(int orderId)
@@ -53,6 +85,7 @@ namespace CarSystem.Repositories
                 order.OrderStatusId = 3; // Rejected status
                 _context.SaveChanges();
             }
+           
         }
     }
 }

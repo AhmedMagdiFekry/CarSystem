@@ -1,0 +1,46 @@
+﻿@model Car
+
+<h2>Car Details</h2>
+
+<div>
+    <h4>@Model.Discription</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Color
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Color
+        </dd>
+        <dt class="col-sm-2">
+            Category
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Category?.CategoryName
+        </dd>
+        <dt class="col-sm-2">
+            Owner
+        </dt>
+        <dd class="col-sm-10">
+            @Model.AppUser.FullName
+        </dd>
+        <dt class="col-sm-2">
+            Car Image
+        </dt>
+        <dd class="col-sm-10">
+            <img src="~/uploads/@Model.CarImage" alt="@Model.Discription" style="max-height: 200px; max-width: 200px;" />
+        </dd>
+    </dl>
+   
+    <div>
+        <form method="get" asp-action="Edit" asp-route-Id="@Model.Id">
+            <button type="submit" class="btn btn-primary">Edit</button>
+        </form>
+    </div>
+    
+    <div>
+        <form method="post" asp-action="DeleteCar" asp-route-carId="@Model.Id">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+        <div>
+</div>

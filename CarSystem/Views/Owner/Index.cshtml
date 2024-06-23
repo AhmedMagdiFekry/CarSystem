@@ -1,4 +1,4 @@
-﻿@* @model IEnumerable<Order>
+﻿@model IEnumerable<Order>
 
 <h2>Pending Reservations</h2>
 
@@ -15,20 +15,19 @@
         @foreach (var order in Model)
         {
             <tr>
-                <td><img src="~/uploads/@order.Car.CarImage" alt="Car image" width="100" height="100" /></td>
-                <div>@order.Car.Discription</div>
                 <td>@order.AppUser.FullName</td>
-                <td>@order.Car.Discription</td>
+                <td><img src="~/uploads/@order.Car.CarImage" alt="Car image" width="100" height="100" /></td>
                 <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
                 <td>
                     <form method="post" asp-action="Approve" asp-route-orderId="@order.Id" style="display:inline-block">
                         <button type="submit" class="btn btn-success">Approve</button>
                     </form>
-                    <form method="post" asp-action="Reject" asp-route-orderId="@order.Id" style="display:inline-block">
+                    <form method="post" asp-action="RejectAsync" asp-route-orderId="@order.Id" style="display:inline-block">
                         <button type="submit" class="btn btn-danger">Reject</button>
                     </form>
+                    
                 </td>
             </tr>
         }
     </tbody>
-</table> *@
+</table>

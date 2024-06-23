@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CarSystem.Controllers
 {
@@ -43,70 +44,88 @@ namespace CarSystem.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateCarViewModel carVm)
+        public async Task<IActionResult> Create(CreateCarViewModel newCar)
         {
             if (ModelState.IsValid)
             {
-                string uniqueFileName = null;
-
-                if (carVm.CarImage != null)
-                {
-                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(carVm.CarImage.FileName);
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await carVm.CarImage.CopyToAsync(fileStream);
-                    }
-                }
-                var user =await _userManager.GetUserAsync(User);
+                var user = await _userManager.GetUserAsync(User);
                 var car = new Car
                 {
-                    CreatedAt = DateTime.Now,
-                    CarImage=uniqueFileName,
-                    CategoryId=carVm.CategoryId,
-                    UserId=user.Id,
-                    Discription=carVm.Description,
-                    Color= carVm.Color,
-                    PricePerDay=carVm.PricePerDay
-
+                    Discription = newCar.Description,
+                    Color = newCar.Color,
+                    CategoryId = newCar.CategoryId,
+                    PricePerDay = newCar.PricePerDay,
+                    UserId = user.Id 
                 };
 
+                if (newCar.CarImage != null)
+                {
+                    var uniqueFileName = GetUniqueFileName(newCar.CarImage.FileName);
+                    var uploads = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+
+                    // Ensure the uploads directory exists
+                    if (!Directory.Exists(uploads))
+                    {
+                        Directory.CreateDirectory(uploads);
+                    }
+
+                    var filePath = Path.Combine(uploads, uniqueFileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        newCar.CarImage.CopyTo(fileStream);
+                    }
+
+                    car.CarImage = uniqueFileName;
+                }
+
+                // Add the new car to the repository
                 _carRepository.Add(car);
 
+                // Create an order associated with this car
                 var order = new Order
                 {
-                    CarId=car.Id,
-                    CreatedAt=DateTime.Now,
-                    OrderStatusId=1,// pending
-                    UserId=user.Id
+                    UserId = user.Id,
+                    CarId = car.Id,
+                    OrderStatusId = 1,
+                    CreatedAt = DateTime.Now
                 };
+
+                
                 _orderRepository.Add(order);
 
-                return RedirectToAction("Index");
-
+                return RedirectToAction(nameof(Index)); 
             }
 
-            var categories = _categoryRepository.GetAll();
-            ViewBag.Categories = new SelectList(categories, "Id", "CategoryName",carVm.CategoryId);
-            return View(carVm);
+            // If ModelState is not valid, reload the form with categories for selection
+            ViewBag.Categories = new SelectList(_categoryRepository.GetAll(), "Id", "CategoryName");
+            return View(newCar);
         }
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
             var car = _carRepository.GetById(id);
-            if (car == null || car.UserId != user.Id)
+            if (car == null)
             {
                 return NotFound();
             }
+
+            var orders = _orderRepository.GetOrdersByCarId(id);
+            if (orders.Any())
+            {
+                TempData["ErrorMessage"] = "This car cannot be deleted because there are existing orders associated with it.";
+                return RedirectToAction("Index");
+            }
+
             _carRepository.Delete(car);
+
             return RedirectToAction("Index");
+        }
+        private string GetUniqueFileName(string fileName)
+        {
+            return Path.GetFileNameWithoutExtension(fileName)
+                      + "_"
+                      + Guid.NewGuid().ToString().Substring(0, 4)
+                      + Path.GetExtension(fileName);
         }
 
     }

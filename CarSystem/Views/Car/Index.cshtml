@@ -1,9 +1,15 @@
 ﻿@model IEnumerable<Car>
 
 @{
-    ViewData["Title"] = "My Cars";
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
 <h2>My Cars</h2>
 
 <table class="table">
@@ -40,6 +46,13 @@
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </td>
+                <td>
+                    <form method="get" asp-action="Details" asp-controller="Owner" asp-route-Id="@car.Id" style="display:inline-block">
+                        <button type="submit" class="btn btn-info">Details</button>
+                    </form>
+                </td>
+                   
+               
             </tr>
         }
     </tbody>

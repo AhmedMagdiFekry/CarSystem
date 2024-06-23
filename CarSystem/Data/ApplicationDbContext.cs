@@ -33,6 +33,7 @@ namespace CarSystem.Data
  
                 new OrderStatus { Id = 3, StatusName = "Rejected" }
                 );
+       
         }
 
         public DbSet<UserType> UserTypes { get; set; }

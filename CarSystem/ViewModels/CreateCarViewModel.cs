@@ -15,7 +15,8 @@ namespace CarSystem.ViewModels
       
         public string Color { get; set; }
         [Display(Name = "Upload Image")]    
-        public IFormFile CarImage { get; set; }
+        public IFormFile? CarImage { get; set; }
+        
         public int CategoryId { get; set; }
 
        

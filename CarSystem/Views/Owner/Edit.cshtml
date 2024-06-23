@@ -1,0 +1,43 @@
+﻿@model EditCarViewModel
+
+<form asp-action="Edit" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ExistingImage" />
+
+    <div class="form-group">
+        <label asp-for="Discription"></label>
+        <input asp-for="Discription" class="form-control" />
+        <span asp-validation-for="Discription" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Color"></label>
+        <input asp-for="Color" class="form-control" />
+        <span asp-validation-for="Color" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CategoryId"></label>
+        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PricePerDay"></label>
+        <input asp-for="PricePerDay" class="form-control" />
+        <span asp-validation-for="PricePerDay" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="CarImage"></label>
+        <input type="file" asp-for="CarImage" class="form-control" />
+        <span asp-validation-for="CarImage" class="text-danger"></span>
+        @if (Model.ExistingImage != null)
+        {
+            <div>
+                <p>Current Image:</p>
+                <img src="~/uploads/@Model.ExistingImage" alt="Car image" style="max-width: 200px;" />
+            </div>
+        }
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

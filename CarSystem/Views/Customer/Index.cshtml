@@ -26,7 +26,7 @@
                     }
                     else
                     {
-                        <form method="post" action="@Url.Action("Reserve", "Customer", new { carId = car.Id })">
+                        <form method="post" asp-action="Reserve" asp-controller="Customer" asp-route-CarId="@car.Id">
                             <button type="submit" class="btn btn-primary">Reserve</button>
                         </form>
                     }

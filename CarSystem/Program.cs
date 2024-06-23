@@ -1,9 +1,11 @@
 using CarSystem.Data;
 using CarSystem.Models;
 using CarSystem.Repositories;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Configuration;
 
 namespace CarSystem
 {
@@ -28,8 +30,6 @@ namespace CarSystem
             builder.Services.AddScoped<IOrderRepository,OrderRepository>();
 
 
-
-           
             builder.Services.AddControllersWithViews();
             var app = builder.Build();
             using (var scope = app.Services.CreateScope())
@@ -69,10 +69,12 @@ namespace CarSystem
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+            });
             app.Run();
         }
        private static async Task SeedRoles(RoleManager<IdentityRole> roleManager)

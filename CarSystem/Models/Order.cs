@@ -8,7 +8,7 @@ namespace CarSystem.Models
         public DateTime CreatedAt { get; set; }
         
         [ForeignKey("AppUser")]
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         [ForeignKey("Car")]
         public int? CarId { get; set; }
         [ForeignKey("OrderStatus")]

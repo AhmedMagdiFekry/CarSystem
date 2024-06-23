@@ -3,10 +3,11 @@ using CarSystem.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarSystem.Controllers
 {
-    [Authorize(Roles ="Customer")]
+    
     public class CustomerController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
@@ -20,45 +21,49 @@ namespace CarSystem.Controllers
             _orderRepository = orderRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var cars = _carRepository.GetApprovedCars();
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var pendingOrders = _orderRepository.GetOrdersByUserId(user.Id);
+                ViewBag.PendingOrders = pendingOrders;
+            }
             return View(cars);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Reserve(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reserve(int carId)
         {
-            var car = _carRepository.GetById(id);
-            if (car == null || car.IsReserved)
-            {
-                return NotFound();
-            }
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return Unauthorized();
+                return NotFound();
             }
 
-            if (car.IsReserved)
+            var car = _carRepository.GetById(carId);
+            if (car == null || car.IsReserved)
             {
-                ModelState.AddModelError("", "This car is already reserved.");
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
 
             car.IsReserved = true;
             _carRepository.Update(car);
 
+
             var order = new Order
             {
-                UserId = user.Id,
+                UserId = user.Id, // Customer making the reservation
                 CarId = car.Id,
                 OrderStatusId = 1, // Pending
                 CreatedAt = DateTime.Now
             };
-            _orderRepository.Add(order);
 
-          
+            // Add the order to the repository and save changes
+            _orderRepository.Add(order);
+            
 
             return RedirectToAction(nameof(Index));
         }

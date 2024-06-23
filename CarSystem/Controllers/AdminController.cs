@@ -17,14 +17,16 @@ namespace CarSystem.Controllers
 
         private readonly IUserTypeRepository _userTypeRepository;
         private readonly IOrderRepository _orderRepository;
+        private readonly ICarRepository _carRepository;
 
-        public AdminController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IUserTypeRepository userTypeRepository, IOrderRepository orderRepository)
+        public AdminController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IUserTypeRepository userTypeRepository, IOrderRepository orderRepository,ICarRepository carRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
 
             _userTypeRepository = userTypeRepository;
             _orderRepository = orderRepository;
+            _carRepository = carRepository;
         }
         public IActionResult Index()
         {
@@ -80,24 +82,43 @@ namespace CarSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var cars = _carRepository.GetCarsByUserId(id);
+                foreach (var car in cars)
+                {
+                    var orders = _orderRepository.GetOrdersByCarId(car.Id);
+                    foreach (var order in orders)
+                    {
+                        _orderRepository.Delete(order);
+                    }
+                    _carRepository.DeleteCar(car.Id);
+                }
+
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError(string.Empty, "Failed to delete the user.");
+                    return RedirectToAction("Index");
+                }
+
+                return RedirectToAction("Index");
+            
+        }
+        public async Task<IActionResult> ApproveCars()
+        {
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return NotFound();
             }
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
-            {
-                ModelState.AddModelError(string.Empty, "Failed to delete the user.");
-                return RedirectToAction("Index");
-            }
-
-            return RedirectToAction("Index");
-        }
-        public IActionResult ApproveCars()
-        {
-            var pendingOrders = _orderRepository.GetPendingOrders();
+            var pendingOrders = _orderRepository.GetPendingOrdersForAdmin();
             return View(pendingOrders);
         }
 
